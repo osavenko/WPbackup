@@ -19,6 +19,7 @@ public class Main {
                 ArrayList<WPTableSchema> list = schema.getTableList();
                 for(WPTableSchema tableSchema:list){
                     System.out.println(tableSchema);
+                    tableSchema.printRows();
                 }
             }
 

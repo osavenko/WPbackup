@@ -6,6 +6,25 @@ public class WPField {
     private boolean primary;
     private boolean autoincrement;
     private String defaultValue;
+    private boolean index;
+
+    public boolean isIndex() {
+        return index;
+    }
+
+    public void setIndex(boolean index) {
+        this.index = index;
+    }
+
+    public boolean isNullable() {
+        return isNullable;
+    }
+
+    public void setNullable(boolean nullable) {
+        isNullable = nullable;
+    }
+
+    private boolean isNullable;
 
     public boolean isAutoincrement() {
         return autoincrement;

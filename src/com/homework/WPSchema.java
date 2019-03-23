@@ -33,11 +33,14 @@ public class WPSchema {
         ArrayList<String> listTable = new ArrayList<>();
         if (conn != null){
             Statement statement = conn.createStatement();
+            //Read all tables name from information_schema.tables with  prefix the tables
             ResultSet rsTables = statement.executeQuery(SQLQuery.getSQLScanTables("wp"));
             while(rsTables.next()){
                 listTable.add(rsTables.getString("TABLE_NAME"));
             }
             rsTables.close();
+            // for each table read her fields(columns) from information_schema.COLUMNS
+            //
             for(String name:listTable){
                 WPTableSchema tableSchema = new WPTableSchema();
                 tableSchema.setTableName(name);
@@ -45,6 +48,48 @@ public class WPSchema {
                 while (rsRows.next()){
                     WPField field = new WPField();
                     field.setName(rsRows.getString("COLUMN_NAME"));
+
+                    String defValue = rsRows.getString("COLUMN_DEFAULT");
+                    if (defValue!=null){
+                        String temp = "";
+                        try{
+                            int tempI = Integer.parseInt(defValue);
+                            temp = Integer.toString(tempI);
+                        } catch (Exception e){
+                            temp = "'"+defValue+"'";
+                        }
+                        field.setDefaultValue("default "+temp);
+                    }else {
+                        field.setDefaultValue("");
+                    }
+
+                    String isNullable = rsRows.getString("IS_NULLABLE");
+                    if (isNullable.equals("YES")){
+                        field.setNullable(true);
+                    } else{
+                        field.setNullable(false);
+                    }
+                    field.setType(rsRows.getString("COLUMN_TYPE"));
+
+                    String tmpExtra = rsRows.getString("EXTRA");
+                    if (tmpExtra.equals("auto_increment")){
+                        field.setAutoincrement(true);
+                    }else{
+                        field.setAutoincrement(false);
+                    }
+
+                    String tmpPrimary = rsRows.getString("COLUMN_KEY");
+                    if (tmpPrimary.equals("PRI")){
+                        field.setPrimary(true);
+                    }else{
+                        field.setPrimary(false);
+                    }
+
+                    if (tmpPrimary.equals("MUL")){
+                        field.setIndex(true);
+                    } else{
+                        field.setIndex(false);
+                    }
                     tableSchema.addField(field);
                 }
                 list.add(tableSchema);
